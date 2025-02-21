@@ -13,12 +13,13 @@ import Error from "./components/Error";
 import MovieDetails from "./components/MovieDetails";
 
 import { KEY } from "./constants/constant";
+// import { tempWatchedData } from "./data/data";
 
 /* Logo, Search, NumResult */
 
 export default function App() {
-  const [watched, setWatched] = useState([]);
   const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   // const query = "sbvdhwbskfk";
@@ -31,6 +32,14 @@ export default function App() {
 
   function handleCloseMovie() {
     setSelectedID(null);
+  }
+
+  function handleWatched(movie) {
+    setWatched((watched) => [...watched, movie]);
+  }
+
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
   useEffect(
@@ -77,16 +86,15 @@ export default function App() {
       <NavBar>
         <Logo />
         <Search query={query} setQuery={setQuery} />
-        {/* <NumResult movies={movies} /> */}
+        <NumResult movies={movies} />
       </NavBar>
       <Main>
         <Box>
           {isLoading && <Loading />}
-          {error ? (
-            <Error error={error} />
-          ) : (
+          {!isLoading && !error && (
             <MovieList movies={movies} onSelectID={handleSelectMovie} />
           )}
+          {error && <Error error={error} />}
         </Box>
         {/* <Box>{isLoading ? <Loading /> : <MovieList movies={movies} />}</Box> */}
         <Box>
@@ -94,11 +102,16 @@ export default function App() {
             <MovieDetails
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
+              onAddWatched={handleWatched}
+              watched={watched}
             />
           ) : (
             <>
               <Summary watched={watched} />
-              <WatchedList watched={watched} />
+              <WatchedList
+                watched={watched}
+                onDeleteWatched={handleDeleteWatched}
+              />
             </>
           )}
         </Box>

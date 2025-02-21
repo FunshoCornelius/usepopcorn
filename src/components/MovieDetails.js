@@ -1,8 +1,11 @@
-import React, { act, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { KEY } from "../constants/constant";
 
-function MovieDetails({ selectedId, onCloseMovie }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [MovieDetails, setMovieDetails] = useState({});
+
+  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
+  console.log(isWatched);
 
   const {
     Title: title,
@@ -16,6 +19,20 @@ function MovieDetails({ selectedId, onCloseMovie }) {
     Director: director,
     Genre: genre,
   } = MovieDetails;
+
+  function handleAdd() {
+    const newWatchedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      runtime,
+      imdbRating,
+    };
+    onAddWatched(newWatchedMovie);
+    onCloseMovie();
+  }
+
   useEffect(
     function () {
       async function fetchMovieDetails() {
@@ -30,6 +47,19 @@ function MovieDetails({ selectedId, onCloseMovie }) {
       fetchMovieDetails();
     },
     [selectedId]
+  );
+
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+
+      return function () {
+        document.title = "usePopcorn";
+      };
+    },
+
+    [title]
   );
   return (
     <>
@@ -52,7 +82,13 @@ function MovieDetails({ selectedId, onCloseMovie }) {
       </header>
       <section>
         <div className="rating">
-          <button className="btn-add">+ Add to Watched List</button>
+          {isWatched ? (
+            <p>This movie is rated {imdbRating} ⭐️ on IMDB</p>
+          ) : (
+            <button className="btn-add" onClick={handleAdd}>
+              + Add to Watched List
+            </button>
+          )}
         </div>
         <p>
           <em>{plot}</em>
